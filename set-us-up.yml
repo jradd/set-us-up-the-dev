@@ -1,0 +1,54 @@
+---
+- hosts: vagrant
+  user: "{{ user }}"
+  vars_files:
+    - vars/default.yml
+  sudo: yes
+  tasks:
+   
+    - name: generate ssh key (will not overwrite)
+      user: name={{ user }} generate_ssh_key=yes ssh_key_bits=2048 ssh_key_file=/home/{{ user}}/.ssh.id_rsa_{{ user }} ssh_key_type=rsa
+    
+    - name: apt-get update and install python-dev
+      apt: name=python-dev update_cache=yes state=present
+    - name: apt-get install python-pip
+      apt: name=python-pip state=present
+    - name: apt-get install fontconfig
+      apt: name=fontconfig update_cache=no state=present
+    - name: create dotfiles directory in home
+      file: path=/home/{{ user }}/.dotfiles/ state=directory owner={{ user }}
+    - name: install Vim
+      apt: pkg=vim state=present
+      sudo: yes
+    - name: mkdir vim bundle
+      file: path=/home/{{ user }}/.vim/bundle state=directory owner={{ user }} group={{ user }}
+    - name: install vundle
+      git: repo=https://github.com/gmarik/Vundle.vim.git dest=/home/{{ user }}/.vim/bundle accept_hostkey=yes
+    - name: create colors dir in vim
+      file: path=/home/{{ user }}/.vim/colors state=directory group={{ user }} owner={{ user }}
+    - name: install solarized
+      get_url: url=https://github.com/altercation/vim-colors-solarized/raw/master/colors/solarized.vim dest=/home/{{ user }}/.vim/colors/solarized.vim
+      #      git: repo=https://github.com/altercation/vim-colors-solarized dest=/home/{{ user }}/.vim/ accept_hostkey=yes
+    - name: check if dotfiles exists
+      file: name=/home/{{ user }}/.dotfiles state=absent
+    - name: install dotfiles
+      git: repo=https://github.com/jradd/dotfiles dest=/home/{{ user }}/.dotfiles accept_hostkey=yes
+    - name: permissions
+      file: dest=/home/{{ user }} state=directory group={{ user }} owner={{ user }} recurse=yes
+    - name: create .vimrc symlink
+      file: src=/home/{{ user }}/.dotfiles/vimrc dest=/home/{{ user }}/.vimrc state=link owner={{ user }} group={{ user }} force=yes
+    - name: create tmux.conf symlink
+      file: src=/home/{{ user }}/.dotfiles/tmux.conf dest=/home/{{ user }}/.tmux.conf state=link owner={{ user }} group={{ user }} force=yes
+    - name: create zshrc symlink
+      file: src=/home/{{ user }}/.dotfiles/zshrc dest=/home/{{ user }}/.zshrc state=link owner={{ user }} group={{ user }} force=yes
+    - name: create zshrc.local symlink
+      file: src=/home/{{ user }}/.dotfiles/zshrc.local dest=/home/{{ user }}/.zshrc.local state=link owner={{ user }} group={{ user }} force=yes
+
+    - name: set zsh as default shell
+      user: name={{ user }} shell=/bin/zsh
+
+    - name: font cache
+      command: fc-cache -vf
+
+#    - name: install spf13-vim, the ultimate Vim distribution (http://vim.spf13.com)
+#      action: shell curl http://j.mp/spf13-vim3 -L -o - | sh

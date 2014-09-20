@@ -1,0 +1,5 @@
+#
+user: "radd"
+ssh_key_type: "rsa"
+dotfiles_dir: "/home/{{ user }}/.dotfiles"
+

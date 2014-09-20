@@ -1,0 +1,11 @@
+[local]
+localhost           ansible_connection=local ansible_ssh_user=radd
+
+[web]
+127.0.0.1           ansible_ssh_port=2222 ansible_ssh_host=127.0.0.1 ansible_connection=ssh ansible_ssh_user=vagrant
+
+[droplets]
+boothologie.net     ansible_ssh_port=2212  ansible_connection=ssh  ansible_ssh_user=radd
+
+[vagrant]
+lvu-web-dev         ansible_ssh_port=22 ansible_ssh_host=10.4.0.15 ansible_connection=ssh ansible_ssh_user=radd
